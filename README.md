@@ -1,6 +1,8 @@
-# neural_fractal
+# Neural Fractal
 
-A small experiment in teaching a neural network to draw fractals. It's a neural fractal approximator built with [PyTorch](https://pytorch.org/) that learns fractals such as **Mandelbrot** and **Julia**. Images are rendered progressively during training, so you can watch the fractal take shape in real time.
+A small experiment in teaching a neural network to draw fractals, made for learning and artistic purposes.
+
+It's a neural fractal approximator built with [PyTorch](https://pytorch.org/) that learns fractals such as **Mandelbrot** and **Julia**. Images are rendered progressively during training, so you can watch the fractal take shape in real time. 
 
 <img src="fractals/julia.png" alt="Julia set" width="128"> <img src="fractals/mandelbrot.png" alt="Mandelbrot set" width="128"> <img src="fractals/burning_ship.png" alt="Burning Ship fractal" width="128"> <img src="fractals/newton.png" alt="Newton fractal" width="128">
 
@@ -71,7 +73,7 @@ training:
 
 generation:
   resolution: 512
-  preset: "julia"   # julia | mandelbrot | burning_ship | newton
+  preset: "julia" # julia | mandelbrot | burning_ship | newton
 
 paths:
   live: "live/"
@@ -94,8 +96,8 @@ Output is written as it goes:
 - `log/epoch_<N>.png` is saved every 10 epochs and on the final epoch, so you can compare snapshots later.
 - `log/log.csv` records the loss for each epoch and is written when training finishes.
 
-Open `analysis.ipynb` to look at the logged data.
+Open `analysis.ipynb` to look at the logged data together.
 
 ## License
 
-MIT License
+MIT
