@@ -22,7 +22,8 @@ It's a neural fractal approximator built with [PyTorch](https://pytorch.org/) th
 - Matplotlib
 - pandas
 
-Training runs on a CUDA GPU if one is available and falls back to the CPU otherwise.
+> [!NOTE]
+> Training runs on a CUDA GPU if one is available and falls back to the CPU otherwise.
 
 ## Installation
 
@@ -55,6 +56,10 @@ Most parameters live in two YAML files:
 - `configs/default.yaml`: model, dataset, training and generation settings, including which fractal preset to use.
 - `configs/fractal.yaml`: the parameters for each fractal preset (iteration count, constants, color mapping).
 
+> [!IMPORTANT]
+> Keep the trailing slash on the `paths` entries, since file names are appended to them directly.
+
+
 The defaults train on the Julia preset for 30 epochs and render at 512x512:
 
 ```yaml
@@ -80,7 +85,8 @@ paths:
   log: "log/"
 ```
 
-To train on a different fractal, change `generation.preset`. Keep the trailing slash on the `paths` entries, since file names are appended to them directly.
+> [!TIP]
+> To train on a different fractal, change `generation.preset`.
 
 ## Training and Results
 
@@ -93,11 +99,12 @@ python train.py
 Output is written as it goes:
 
 - `live/fractal.png` is overwritten after every epoch with the model's current attempt.
-- `log/epoch_<N>.png` is saved every 10 epochs and on the final epoch, so you can compare snapshots later.
+- `log/epoch_{n}.png` is saved every 10 epochs and on the final epoch, so you can compare snapshots later.
 - `log/log.csv` records the loss for each epoch and is written when training finishes.
 
-Open `analysis.ipynb` to look at the logged data together.
+> [!TIP]
+> Open `analysis.ipynb` to look at the logged data together.
 
 ## License
 
-MIT
+[MIT license](LICENSE)
