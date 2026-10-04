@@ -19,8 +19,9 @@ It's a neural fractal approximator built with [PyTorch](https://pytorch.org/) th
 - PyTorch
 - Pillow
 - PyYAML
-- Matplotlib
 - pandas
+- Matplotlib
+- Jupyter
 
 > [!NOTE]
 > Training runs on a CUDA GPU if one is available and falls back to the CPU otherwise.
