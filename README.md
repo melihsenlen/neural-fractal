@@ -48,7 +48,7 @@ Each run goes through the same pipeline:
    
 5. **Update.** The prediction is scored against the true color with mean squared error, and the weights are adjusted with Adam Optimizer.
     
-6. **Render.** After every epoch, the network is queried at every pixel of a `resolution` x `resolution` grid and the result is saved as `live/fractal.png`. This is the network's current guess, not the formula's raw output.
+6. **Render.** After every epoch, the network is queried at every pixel of a `resolution` x `resolution` grid and the result is saved as `live/fractal.png`. Again, this is the network's current guess, not the formula's raw output.
 
 ## Configuration
 
@@ -59,7 +59,6 @@ Most parameters live in two YAML files:
 
 > [!IMPORTANT]
 > Keep the trailing slash on the `paths` entries, since file names are appended to them directly.
-
 
 The defaults train on the Julia preset for 30 epochs and render at 512x512:
 
@@ -86,18 +85,15 @@ paths:
   log: "log/"
 ```
 
-> [!TIP]
-> To train on a different fractal, change `generation.preset`.
+> [!NOTE]
+> - To train on a different fractal, change `generation.preset`.
+> - `batch_size` does not necessarily need to be in relation to `num_samples`, but it's nicer :)
 
-## Training and Results
-
-Start training with:
+## Training & Results
 
 ```bash
 python train.py
 ```
-
-Output is written as it goes:
 
 - `live/fractal.png` is overwritten after every epoch with the model's current attempt.
 - `log/epoch_{n}.png` is saved every 10 epochs and on the final epoch, so you can compare snapshots later.

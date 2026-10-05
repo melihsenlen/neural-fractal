@@ -17,42 +17,41 @@ def render_fractal(model: torch.nn.Module, resolution: int, device: str) -> Imag
         rgb = model(coords).clamp(0, 1).cpu().numpy()
     return Image.fromarray((rgb.reshape(resolution, resolution, 3) * 255).astype("uint8"))
 
-defaults = load_config("configs/default.yaml")
-fractals = load_config("configs/fractal.yaml")
-
-model_params   = defaults["model"]
-dataset_params = defaults["dataset"]
-
-training   = defaults["training"]
-generation = defaults["generation"]
-paths      = defaults["paths"]
-
-fractal = fractals[generation["preset"]]
-device  = "cuda" if torch.cuda.is_available() else "cpu"
-
-dataset    = (torch.rand(dataset_params["num_samples"], 2) - 0.5) * 4
-dataloader = DataLoader(dataset, batch_size=dataset_params["batch_size"], shuffle=True)
-
-model = FractalNet(
-    hidden_dim=model_params["hidden_dim"],
-    num_layers=model_params["num_layers"],
-    num_frequencies=model_params["num_frequencies"],
-).to(device)
-
-optimizer = torch.optim.Adam(model.parameters(), lr=training["lr"])
-criterion = torch.nn.MSELoss()
-
-live_path = paths["live"]
-Path(live_path).mkdir(exist_ok=True)
-log_path  = paths["log"]
-Path(log_path).mkdir(exist_ok=True)
-
-resolution = generation["resolution"]
-epochs     = training["epochs"]
-
-loss_history = []
-
 if __name__ == "__main__":
+    defaults = load_config("configs/default.yaml")
+    fractals = load_config("configs/fractal.yaml")
+
+    model_params   = defaults["model"]
+    dataset_params = defaults["dataset"]
+
+    training   = defaults["training"]
+    generation = defaults["generation"]
+    paths      = defaults["paths"]
+
+    fractal = fractals[generation["preset"]]
+    device  = "cuda" if torch.cuda.is_available() else "cpu"
+
+    dataset    = (torch.rand(dataset_params["num_samples"], 2) - 0.5) * 4
+    dataloader = DataLoader(dataset, batch_size=dataset_params["batch_size"], shuffle=True)
+
+    model = FractalNet(
+        hidden_dim=model_params["hidden_dim"],
+        num_layers=model_params["num_layers"],
+        num_frequencies=model_params["num_frequencies"],
+    ).to(device)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=training["lr"])
+    criterion = torch.nn.MSELoss()
+
+    live_path = paths["live"]
+    Path(live_path).mkdir(exist_ok=True)
+    log_path  = paths["log"]
+    Path(log_path).mkdir(exist_ok=True)
+
+    resolution = generation["resolution"]
+    epochs     = training["epochs"]
+
+    loss_history = []
     for epoch in range(epochs):
         total_loss = 0
         for coords in dataloader:
