@@ -1,6 +1,6 @@
 # Neural Fractal
 
-A small experiment in teaching a neural network to draw fractals, made for learning and artistic purposes.
+An experiment in teaching a neural network to draw fractals, made for learning and artistic purposes.
 
 It's a neural fractal approximator built with [PyTorch](https://pytorch.org/) that learns fractals such as **Mandelbrot** and **Julia**. Images are rendered progressively during training, so you can watch the fractal take shape in real time. 
 
@@ -23,9 +23,6 @@ It's a neural fractal approximator built with [PyTorch](https://pytorch.org/) th
 - Matplotlib
 - Jupyter
 
-> [!NOTE]
-> Training runs on a CUDA GPU if one is available and falls back to the CPU otherwise.
-
 ## Installation
 
 ```bash
@@ -34,21 +31,17 @@ pip install -r requirements.txt
 
 ## How the Network Learns a Fractal
 
-The model is a function from a point to a color. It never sees the fractal's formula, only points and their true colors, a bit like learning a map by being dropped to random places and then drawing the whole thing from memory.
+The model is a function from a point to a color. It never sees the fractal's formula, only points and their true colors, a bit like learning a map by being dropped to random places and then drawing the whole picture from memory.
 
-Each run goes through the same pipeline:
-
-1. **Sample points.** Random `(x, y)` points in the square from -2 to 2 are drawn once at the start (`num_samples`) and reshuffled every epoch.
+1. **Sample:** Random `(x, y)` points in the square from -2 to 2 are drawn once at the start (`num_samples`) and reshuffled every epoch.
    
-2. **Compute the true color.** `architecture/targets.py` runs the fractal's iteration on each point for up to `iters` steps and counts how many steps the point stays bounded (Julia, Mandelbrot, Burning Ship) or how many it spends settled on a root (Newton). That count is divided by `iters` and passed through sine waves (the `cmap` values in `configs/fractal.yaml`) to get an RGB color.
+2. **Compute:** `architecture/targets.py` runs the fractal's iteration on each point for up to `iters` steps and counts how many steps the point stays bounded (Julia, Mandelbrot, Burning Ship) or how many it spends settled on a root (Newton). That count is divided by `iters` and passed through sine waves (the `cmap` values in `configs/fractal.yaml`) to get an RGB color.
    
-3. **Encode the input.** Each point is expanded with sine and cosine waves at `num_frequencies` evenly spaced frequencies, giving `2 + 4 * num_frequencies` inputs (26 with the default of 6). Raw coordinates alone tend to produce smooth, blurry output, and the waves are what lets the network pick up fine, repeating detail.
+3. **Encode:** Each point is expanded with sine and cosine waves at `num_frequencies` evenly spaced frequencies, giving `2 + 4 * num_frequencies` inputs (26 with the default of 6). Raw coordinates alone tend to produce smooth, blurry output, and the waves are what lets the network pick up repeating patterns.
    
-4. **Predict a color.** A fully connected network (`num_layers` hidden layers of `hidden_dim` ReLU units) maps the encoded point to three outputs: red, green and blue.
+4. **Predict:** A fully connected network (`num_layers` hidden layers of `hidden_dim` ReLU units) maps the encoded point to three outputs: red, green and blue.
    
-5. **Update.** The prediction is scored against the true color with mean squared error, and the weights are adjusted with Adam Optimizer.
-    
-6. **Render.** After every epoch, the network is queried at every pixel of a `resolution` x `resolution` grid and the result is saved as `live/fractal.png`. Again, this is the network's current guess, not the formula's raw output.
+5. **Epoch:** The prediction is scored against the true color with mean squared error, and the weights are adjusted with Adam.
 
 ## Configuration
 
@@ -56,9 +49,6 @@ Most parameters live in two YAML files:
 
 - `configs/default.yaml`: model, dataset, training and generation settings, including which fractal preset to use.
 - `configs/fractal.yaml`: the parameters for each fractal preset (iteration count, constants, color mapping).
-
-> [!IMPORTANT]
-> Keep the trailing slash on the `paths` entries, since file names are appended to them directly.
 
 The defaults train on the Julia preset for 30 epochs and render at 512x512:
 
@@ -85,9 +75,8 @@ paths:
   log: "log/"
 ```
 
-> [!NOTE]
-> - To train on a different fractal, change `generation.preset`.
-> - `batch_size` does not necessarily need to be in relation to `num_samples`, but it's nicer :)
+- Keep the trailing slash on the `paths` entries, since file names are appended to them directly.
+- `batch_size` does not necessarily need to be in relation to `num_samples`.
 
 ## Training & Results
 
@@ -99,8 +88,7 @@ python train.py
 - `log/epoch_{n}.png` is saved every 10 epochs and on the final epoch, so you can compare snapshots later.
 - `log/log.csv` records the loss for each epoch and is written when training finishes.
 
-> [!TIP]
-> Open `analysis.ipynb` to look at the logged data together.
+Open `analysis.ipynb` to look at the logged data together.
 
 ## License
 
