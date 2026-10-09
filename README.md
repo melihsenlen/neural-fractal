@@ -31,17 +31,17 @@ pip install -r requirements.txt
 
 ## How the Network Learns a Fractal
 
-The model is a function from a point to a color. It never sees the fractal's formula, only points and their true colors, a bit like learning a map by being dropped to random places and then drawing the whole picture from memory, 
+The model is a function from a point to a color. It never sees the fractal's actual formula, only points and their true colors, a bit like learning a map by being dropped to random places and then drawing the whole picture from memory.
 
-1. **Sample:** Random `(x, y)` points in the square from -2 to 2 are drawn once at the start (`samples`) and reshuffled every epoch.
-   
-2. **Compute:** `architecture/targets.py` runs the fractal's iteration on each point for up to `iters` steps and counts how many steps the point stays bounded (Julia, Mandelbrot, Burning Ship) or how many it spends settled on a root (Newton). That count is divided by `iters` and passed through sine waves (the `cmap` values in `configs/fractal.yaml`) to get an RGB color.
-   
-3. **Encode:** Each point is expanded with sine and cosine waves at `frequencies` increasing speeds, giving `2 + 4*frequencies` inputs (26 with the default of 6). Raw coordinates change slowly across the image, so on their own they tend to produce smooth, blurry output. Low frequencies capture coarse position while high ones separate nearby pixels, which lets the network pick up repeating patterns.
-   
-4. **Predict:** A fully connected network (`layers` hidden layers of `hidden_dim` ReLU units) maps the encoded point to three outputs: red, green and blue.
-   
-5. **Epoch:** The prediction is scored against the true color with mean squared error, and the weights are adjusted with Adam.
+1. **Sample:** Random `(x, y)` points in the square from -2 to 2 are drawn once at the start (`num_samples`) and reshuffled every epoch.
+
+2. **Compute:** For each batch, `architecture/targets.py` iterates the fractal's rule on every point for `iters` steps and records how long the point stays bounded (Julia, Mandelbrot, Burning Ship) or how long it rests on a root (Newton). This escape time, divided by `iters`, is passed through sine waves (the `cmap` values in `configs/fractal.yaml`) to become an RGB color.
+
+3. **Encode:** Each coordinate is expanded into sine and cosine waves at `frequencies` evenly increasing speeds, giving `2 + 4*frequencies` inputs (26 with the default of 6). Raw coordinates vary slowly across the image, so on their own they yield smooth, blurry output. The waves are much better at telling nearby pixels apart, but their main caveat is letting the network pick up repeating patterns.
+
+4. **Predict:** A fully connected network maps the encoded point to three outputs: red, green and blue. Nothing bounds these outputs during training, so they are clamped to the range 0 to 1 only when the image is rendered.
+
+5. **Epoch:** On each batch, mean squared error measures the distance between the prediction and the true color, and Adam nudges the weights to close it. After every epoch, the current attempt is rendered to `live/fractal.png`.
 
 ## Configuration
 
