@@ -1,5 +1,5 @@
 model:
-  num_frequencies: 6
+  frequencies: 6
   hidden_dim: 256
   num_layers: 4
 

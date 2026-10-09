@@ -1,9 +1,9 @@
 import torch
+import pandas as pd
 from PIL import Image
 from torch.utils.data import DataLoader
-from pathlib import Path
 
-from architecture.config import load_config
+from architecture.config import load_config, path
 from architecture.model import FractalNet
 from architecture.targets import targets
 
@@ -35,18 +35,18 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=dataset_params["batch_size"], shuffle=True)
 
     model = FractalNet(
-        hidden_dim=model_params["hidden_dim"],
-        num_layers=model_params["num_layers"],
-        num_frequencies=model_params["num_frequencies"],
+        model_params["frequencies"],
+        model_params["hidden_dim"],
+        model_params["num_layers"]
     ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=training["lr"])
     criterion = torch.nn.MSELoss()
 
-    live_path = paths["live"]
-    Path(live_path).mkdir(exist_ok=True)
-    log_path  = paths["log"]
-    Path(log_path).mkdir(exist_ok=True)
+    live_path = path(defaults, "live")
+    live_path.mkdir(exist_ok=True)
+    log_path  = path(defaults, "log")
+    log_path.mkdir(exist_ok=True)
 
     resolution = generation["resolution"]
     epochs     = training["epochs"]
@@ -71,12 +71,9 @@ if __name__ == "__main__":
         print(f"Epoch {epoch + 1}/{epochs} | Loss: {avg_loss:.6f}")
 
         img = render_fractal(model, resolution=resolution, device=device)
-        img.save(Path(live_path + "fractal.png"))
+        img.save(live_path / "fractal.png")
 
         if (epoch + 1) % 10 == 0 or (epoch + 1) == epochs:
-            img.save(Path(log_path + f"epoch_{epoch + 1}.png"))
-
-    with open(Path(log_path + "log.csv"), "w") as c:
-        c.write("epoch,loss\n")
-        for i, loss in enumerate(loss_history):
-            c.write(f"{i + 1},{loss:.6f}\n")
+            img.save((log_path / f"epoch_{epoch + 1}.png"))
+    
+    pd.Series(loss_history, name="loss", index=pd.RangeIndex(1, (len(loss_history) + 1), name="epoch")).to_csv((log_path / "log.csv"))
