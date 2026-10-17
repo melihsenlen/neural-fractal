@@ -8,7 +8,7 @@ from architecture.model import FractalNet
 from architecture.targets import targets
 
 
-def render_fractal(model: torch.nn.Module, resolution: int, device: str) -> Image.Image:
+def render(model: torch.nn.Module, resolution: int, device: str) -> Image.Image:
     x = torch.linspace(-2, 2, resolution)
     y = torch.linspace(-2, 2, resolution)
     grid_x, grid_y = torch.meshgrid(x, y, indexing="ij")
@@ -16,6 +16,7 @@ def render_fractal(model: torch.nn.Module, resolution: int, device: str) -> Imag
     with torch.no_grad():
         rgb = model(coords).clamp(0, 1).cpu().numpy()
     return Image.fromarray((rgb.reshape(resolution, resolution, 3) * 255).astype("uint8"))
+
 
 if __name__ == "__main__":
     defaults = load_config("configs/default.yaml")
@@ -29,10 +30,13 @@ if __name__ == "__main__":
     paths      = defaults["paths"]
 
     fractal = fractals[generation["preset"]]
-    device  = "cuda" if torch.cuda.is_available() else "cpu"
+    device  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    dataset    = (torch.rand(dataset_params["num_samples"], 2) - 0.5) * 4
-    dataloader = DataLoader(dataset, batch_size=dataset_params["batch_size"], shuffle=True)
+    dataloader = DataLoader(
+        (torch.rand(dataset_params["num_samples"], 2) - 0.5) * 4, # dataset
+        dataset_params["batch_size"], # batch_size
+        True # shuffle
+    )
 
     model = FractalNet(
         model_params["frequencies"],
@@ -40,7 +44,7 @@ if __name__ == "__main__":
         model_params["num_layers"]
     ).to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=training["lr"])
+    optimizer = torch.optim.Adam(model.parameters(), training["lr"])
     criterion = torch.nn.MSELoss()
 
     live_path = path(defaults, "live")
@@ -57,7 +61,6 @@ if __name__ == "__main__":
         for coords in dataloader:
             coords = coords.to(device)
             target = targets(coords, fractal).to(device)
-
             optimizer.zero_grad()
             output = model(coords)
             loss = criterion(output, target)
@@ -70,10 +73,13 @@ if __name__ == "__main__":
 
         print(f"Epoch {epoch + 1}/{epochs} | Loss: {avg_loss:.6f}")
 
-        img = render_fractal(model, resolution=resolution, device=device)
+        img = render(model, resolution, device)
         img.save(live_path / "fractal.png")
 
         if (epoch + 1) % 10 == 0 or (epoch + 1) == epochs:
             img.save((log_path / f"epoch_{epoch + 1}.png"))
     
-    pd.Series(loss_history, name="loss", index=pd.RangeIndex(1, (len(loss_history) + 1), name="epoch")).to_csv((log_path / "log.csv"))
+    pd.Series(
+        data=loss_history, name="loss", # data
+        index=pd.RangeIndex(1, (len(loss_history) + 1), name="epoch") # index
+    ).to_csv((log_path / "log.csv"))
