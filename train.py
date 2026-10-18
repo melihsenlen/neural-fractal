@@ -4,7 +4,7 @@ from PIL import Image
 from torch.utils.data import DataLoader
 
 from architecture.config import load_config, path
-from architecture.model import FractalNet
+from architecture.model import NeuralFractal
 from architecture.targets import targets
 
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = FractalNet(
+    model = NeuralFractal(
         model_params["frequencies"],
         model_params["hidden_dim"],
         model_params["num_layers"]
